@@ -25,6 +25,7 @@ export default function TopNav() {
     e.preventDefault()
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
+      setSearchQuery("") // Clear the input after search
     }
   }
 
