@@ -1,5 +1,7 @@
 # QuizMaster App
 
+![image](https://github.com/user-attachments/assets/2b491887-4cea-4b9f-b72d-d455cce7020b)
+
 ## Overview
 QuizMaster App is a modern, interactive educational platform to track quiz progress, review past performances, and engage with a dynamic leaderboard. The application boasts a beautiful UI with smooth animations and real-time insights for a delightful learning experience.
 
