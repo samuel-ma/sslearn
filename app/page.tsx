@@ -8,7 +8,6 @@ import LeaderboardPreview from "@/components/LeaderboardPreview"
 import AnalyticsOverview from "@/components/AnalyticsOverview"
 import { DailyChallenge } from "@/components/DailyChallenge"
 import { StudyStreak } from "@/components/StudyStreak"
-import { QuizOfTheDay } from "@/components/QuizOfTheDay"
 import { Banner } from "@/components/Banner"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
@@ -85,7 +84,6 @@ export default function Dashboard() {
 
           <StudyMaterialsDashboard />
           <LearningSection />
-          <QuizOfTheDay />
         </div>
 
         <div className="space-y-4 lg:space-y-8">
