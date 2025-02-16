@@ -99,7 +99,7 @@ export default function HistoryPage() {
                   </TableCell>
                   <TableCell>{quiz.date}</TableCell>
                   <TableCell>
-                    <Badge variant={quiz.score >= 8 ? "success" : quiz.score >= 6 ? "warning" : "destructive"}>
+                    <Badge variant={quiz.score >= 8 ? "default" : quiz.score >= 6 ? "secondary" : "destructive"}>
                       {quiz.score >= 8 ? "Excellent" : quiz.score >= 6 ? "Good" : "Needs Improvement"}
                     </Badge>
                   </TableCell>
