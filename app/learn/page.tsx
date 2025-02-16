@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -261,37 +261,46 @@ const FeaturedCourseCard = ({ course }: { course: Course }) => (
 export default function LearnPage() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
+  const [activeFilter, setActiveFilter] = useState<"all" | "recent" | "popular" | "trending">("all")
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null)
   const [studyStreak, setStudyStreak] = useState(7)
   const [showAchievement, setShowAchievement] = useState(false)
 
-  const handleSearch = (searchTerm: string) => {
-    setSearchTerm(searchTerm)
-    // Filter subjects based on search term
-    const filteredSubjects = subjects.filter(
-      (subject) =>
+  // Filter subjects based on search term and active filter
+  const filteredSubjects = useMemo(() => {
+    return subjects.filter(subject => {
+      const matchesSearch = 
         subject.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        subject.description.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
-    // Update UI with filtered subjects
-    //  This would require a more complex UI update mechanism, potentially using a state variable to hold the filtered subjects and conditionally rendering them.  This is omitted for brevity as it's beyond the scope of the prompt.
-  }
+        subject.description.toLowerCase().includes(searchTerm.toLowerCase())
 
-  const handleFilter = (filter: string) => {
-    switch (filter) {
-      case "recent":
-        router.push("/recent")
-        break
-      case "popular":
-        router.push("/popular")
-        break
-      case "trending":
-        router.push("/trending")
-        break
-      default:
-        break
-    }
-  }
+      switch (activeFilter) {
+        case "recent":
+          return matchesSearch && subject.progress > 0
+        case "popular":
+          return matchesSearch && subject.totalCourses > 10
+        case "trending":
+          return matchesSearch && subject.progress > 50
+        default:
+          return matchesSearch
+      }
+    })
+  }, [searchTerm, activeFilter])
+
+  // Filter featured courses based on active filter
+  const filteredCourses = useMemo(() => {
+    return featuredCourses.filter(course => {
+      switch (activeFilter) {
+        case "recent":
+          return course.progress > 0
+        case "popular":
+          return course.enrolled > 1000
+        case "trending":
+          return course.rating > 4.5
+        default:
+          return true
+      }
+    })
+  }, [activeFilter])
 
   useEffect(() => {
     // Simulate achievement unlock
@@ -352,7 +361,7 @@ export default function LearnPage() {
         </div>
       </section>
 
-      {/* Search and Filters */}
+      {/* Updated Search and Filters */}
       <section className="py-8 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col md:flex-row gap-4 items-center">
@@ -362,20 +371,35 @@ export default function LearnPage() {
                 type="text"
                 placeholder="Search courses and subjects..."
                 value={searchTerm}
-                onChange={(e) => handleSearch(e.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => handleFilter("recent")}>
+              <Button 
+                variant={activeFilter === "all" ? "default" : "outline"}
+                onClick={() => setActiveFilter("all")}
+              >
+                All
+              </Button>
+              <Button 
+                variant={activeFilter === "recent" ? "default" : "outline"}
+                onClick={() => setActiveFilter("recent")}
+              >
                 <Clock className="mr-2 h-4 w-4" />
                 Recent
               </Button>
-              <Button variant="outline" onClick={() => handleFilter("popular")}>
+              <Button 
+                variant={activeFilter === "popular" ? "default" : "outline"}
+                onClick={() => setActiveFilter("popular")}
+              >
                 <Star className="mr-2 h-4 w-4" />
                 Popular
               </Button>
-              <Button variant="outline" onClick={() => handleFilter("trending")}>
+              <Button 
+                variant={activeFilter === "trending" ? "default" : "outline"}
+                onClick={() => setActiveFilter("trending")}
+              >
                 <TrendingUp className="mr-2 h-4 w-4" />
                 Trending
               </Button>
@@ -384,25 +408,28 @@ export default function LearnPage() {
         </div>
       </section>
 
-      {/* Subjects Grid */}
+      {/* Updated Subjects Grid */}
       <section className="py-12 px-4">
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-3xl font-bold mb-8">Your Learning Progress</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {subjects.map((subject, index) => (
-              <motion.div
-                key={subject.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                className="cursor-pointer"
-                onClick={() => setSelectedSubject(subject.id)}
-              >
-                <SubjectCard subject={subject} />
-              </motion.div>
-            ))}
-          </div>
+          {filteredSubjects.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-lg text-muted-foreground">No subjects found matching your search criteria.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredSubjects.map((subject, index) => (
+                <motion.div
+                  key={subject.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <SubjectCard subject={subject} />
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -442,22 +469,28 @@ export default function LearnPage() {
         </div>
       </section>
 
-      {/* Featured Courses */}
+      {/* Updated Featured Courses Section */}
       <section className="py-12 px-4">
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-3xl font-bold mb-8">Recommended for You</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredCourses.map((course, index) => (
-              <motion.div
-                key={course.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <FeaturedCourseCard course={course} />
-              </motion.div>
-            ))}
-          </div>
+          {filteredCourses.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-lg text-muted-foreground">No courses found matching your criteria.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCourses.map((course, index) => (
+                <motion.div
+                  key={course.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <FeaturedCourseCard course={course} />
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
