@@ -28,7 +28,7 @@ const subjects: LearningSubject[] = [
     id: "general-knowledge",
     title: "General Knowledge",
     description: "Expand your understanding of various topics",
-    imageUrl: "/placeholder.svg?height=100&width=200&text=General+Knowledge",
+    imageUrl: "/images/placeholder.svg",
     chapters: Array.from({ length: 12 }, (_, i) => ({
       id: `gk-chapter-${i + 1}`,
       title: `Chapter ${i + 1}: ${["World Geography", "Famous Literature", "Art History", "Music Theory", "World Cuisines", "Famous Inventions", "World Leaders", "Natural Wonders", "Ancient Civilizations", "Space Exploration", "World Religions", "Global Economics"][i]}`,
@@ -39,7 +39,7 @@ const subjects: LearningSubject[] = [
     id: "science",
     title: "Science",
     description: "Discover the wonders of the scientific world",
-    imageUrl: "/placeholder.svg?height=100&width=200&text=Science",
+    imageUrl: "/images/placeholder.svg",
     chapters: Array.from({ length: 12 }, (_, i) => ({
       id: `science-chapter-${i + 1}`,
       title: `Chapter ${i + 1}: ${["Physics Basics", "Chemistry Fundamentals", "Biology Essentials", "Astronomy Wonders", "Earth Sciences", "Human Anatomy", "Genetics", "Ecology", "Quantum Mechanics", "Organic Chemistry", "Neuroscience", "Scientific Method"][i]}`,
@@ -63,9 +63,9 @@ export default function LearningSection() {
   }
 
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4">Continue Learning</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <section className="space-y-4">
+      <h2 className="text-2xl font-semibold">Continue Learning</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {subjects.map((subject) => {
           const completedChapters = subject.chapters.filter((ch) => ch.completed).length
           const progress = (completedChapters / subject.chapters.length) * 100
@@ -73,13 +73,20 @@ export default function LearningSection() {
           return (
             <Card key={subject.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
               <CardHeader className="p-0">
-                <Image
-                  src={subject.imageUrl || "/placeholder.svg"}
-                  alt={subject.title}
-                  width={400}
-                  height={200}
-                  className="w-full h-40 object-cover"
-                />
+                <div className="relative w-full h-[200px] bg-gray-100">
+                  <Image
+                    src={subject.imageUrl || "/images/placeholder-lesson.jpg"}
+                    alt={subject.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    priority
+                    className="object-cover rounded-md"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/images/placeholder.svg";
+                    }}
+                  />
+                </div>
               </CardHeader>
               <CardContent className="p-6">
                 <CardTitle className="text-xl mb-2">{subject.title}</CardTitle>
@@ -112,7 +119,7 @@ export default function LearningSection() {
           </Button>
         </Link>
       </div>
-    </div>
+    </section>
   )
 }
 

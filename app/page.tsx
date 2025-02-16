@@ -13,6 +13,7 @@ import { Banner } from "@/components/Banner"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { FeaturedQuizzesSkeleton } from "@/components/FeaturedQuizzesSkeleton"
+import { StudyMaterialsDashboard } from "@/components/StudyMaterialsDashboard"
 
 // Update featured quizzes array to use string IDs
 const quizzes = [
@@ -41,7 +42,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
-        <div className="lg:col-span-2 space-y-4 lg:space-y-8">
+        <div className="lg:col-span-2 space-y-8">
           <section>
             {isLoadingFeatured ? (
               <FeaturedQuizzesSkeleton />
@@ -82,6 +83,7 @@ export default function Dashboard() {
             )}
           </section>
 
+          <StudyMaterialsDashboard />
           <LearningSection />
           <QuizOfTheDay />
         </div>
