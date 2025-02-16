@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Trophy, ArrowRight, Medal } from "lucide-react"
 import Link from "next/link"
+import { LeaderboardPreviewSkeleton } from "./LeaderboardPreviewSkeleton"
 
 interface LeaderboardEntry {
   id: number
@@ -39,7 +40,7 @@ export default function LeaderboardPreview() {
   }, [])
 
   if (loading) {
-    return <div className="text-center">Loading leaderboard preview...</div>
+    return <LeaderboardPreviewSkeleton />
   }
 
   return (

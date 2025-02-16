@@ -1,9 +1,13 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowRight, BookOpen } from "lucide-react"
+import { LearningProgressSkeleton } from "./LearningProgressSkeleton"
 
 interface Chapter {
   id: string
@@ -45,6 +49,19 @@ const subjects: LearningSubject[] = [
 ]
 
 export default function LearningSection() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (isLoading) {
+    return <LearningProgressSkeleton />
+  }
+
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">Continue Learning</h2>
