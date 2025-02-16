@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,68 @@ export default function SettingsPage() {
   const [darkMode, setDarkMode] = useState(false)
   const [notifications, setNotifications] = useState(true)
   const [twoFactor, setTwoFactor] = useState(false)
+  const [theme, setTheme] = useState("light"); // Default theme
+  const [isDark, setIsDark] = useState(false);
+  const [themeColor, setThemeColor] = useState("zinc"); // Default theme color
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDark]);
+
+  useEffect(() => {
+    // Update multiple CSS variables
+    document.documentElement.style.setProperty("--theme-color", themeColor);
+    switch (themeColor) {
+      case "red":
+        document.documentElement.style.setProperty("--primary", "0 100% 50%");
+        document.documentElement.style.setProperty("--primary-foreground", "0 0% 10%");
+        break;
+      case "rose":
+        document.documentElement.style.setProperty("--primary", "330 100% 70%");
+        document.documentElement.style.setProperty("--primary-foreground", "0 0% 10%");
+        break;
+      case "orange":
+        document.documentElement.style.setProperty("--primary", "30 100% 60%");
+        document.documentElement.style.setProperty("--primary-foreground", "0 0% 10%");
+        break;
+      case "green":
+        document.documentElement.style.setProperty("--primary", "160 60% 45%");
+        document.documentElement.style.setProperty("--primary-foreground", "0 0% 100%");
+        break;
+      case "blue":
+        document.documentElement.style.setProperty("--primary", "220 70% 50%");
+        document.documentElement.style.setProperty("--primary-foreground", "0 0% 100%");
+        break;
+      case "yellow":
+        document.documentElement.style.setProperty("--primary", "50 100% 50%");
+        document.documentElement.style.setProperty("--primary-foreground", "0 0% 10%");
+        break;
+      case "violet":
+        document.documentElement.style.setProperty("--primary", "280 100% 70%");
+        document.documentElement.style.setProperty("--primary-foreground", "0 0% 10%");
+        break;
+      case "zinc":
+        document.documentElement.style.setProperty("--primary", "240 10% 3.9%");
+        document.documentElement.style.setProperty("--primary-foreground", "0 0% 98%");
+        break;
+      default:
+        document.documentElement.style.setProperty("--primary", "240 10% 3.9%");
+        document.documentElement.style.setProperty("--primary-foreground", "0 0% 98%");
+        break;
+    }
+  }, [themeColor]);
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+  };
+
+  const handleThemeColorClick = (color: string) => {
+    setThemeColor(color);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -67,16 +129,44 @@ export default function SettingsPage() {
                   <Label htmlFor="dark-mode">Dark Mode</Label>
                   <p className="text-sm text-muted-foreground">Toggle dark mode on or off</p>
                 </div>
-                <Switch id="dark-mode" checked={darkMode} onCheckedChange={setDarkMode} />
+                <Switch id="dark-mode" checked={isDark} onCheckedChange={toggleTheme} />
               </div>
               <Separator />
               <div className="space-y-2">
                 <Label>Theme Color</Label>
                 <div className="flex space-x-2">
-                  <Button className="w-8 h-8 rounded-full bg-blue-500" />
-                  <Button className="w-8 h-8 rounded-full bg-green-500" />
-                  <Button className="w-8 h-8 rounded-full bg-purple-500" />
-                  <Button className="w-8 h-8 rounded-full bg-pink-500" />
+                  <Button
+                    className={`w-8 h-8 rounded-full bg-red-500 ${themeColor === "red" ? "ring-2 ring-red-500 ring-offset-1" : ""}`}
+                    onClick={() => handleThemeColorClick("red")}
+                  />
+                  <Button
+                    className={`w-8 h-8 rounded-full bg-rose-500 ${themeColor === "rose" ? "ring-2 ring-rose-500 ring-offset-1" : ""}`}
+                    onClick={() => handleThemeColorClick("rose")}
+                  />
+                  <Button
+                    className={`w-8 h-8 rounded-full bg-orange-500 ${themeColor === "orange" ? "ring-2 ring-orange-500 ring-offset-1" : ""}`}
+                    onClick={() => handleThemeColorClick("orange")}
+                  />
+                  <Button
+                    className={`w-8 h-8 rounded-full bg-green-500 ${themeColor === "green" ? "ring-2 ring-green-500 ring-offset-1" : ""}`}
+                    onClick={() => handleThemeColorClick("green")}
+                  />
+                  <Button
+                    className={`w-8 h-8 rounded-full bg-blue-500 ${themeColor === "blue" ? "ring-2 ring-blue-500 ring-offset-1" : ""}`}
+                    onClick={() => handleThemeColorClick("blue")}
+                  />
+                  <Button
+                    className={`w-8 h-8 rounded-full bg-yellow-500 ${themeColor === "yellow" ? "ring-2 ring-yellow-500 ring-offset-1" : ""}`}
+                    onClick={() => handleThemeColorClick("yellow")}
+                  />
+                  <Button
+                    className={`w-8 h-8 rounded-full bg-violet-500 ${themeColor === "violet" ? "ring-2 ring-violet-500 ring-offset-1" : ""}`}
+                    onClick={() => handleThemeColorClick("violet")}
+                  />
+                  <Button
+                    className={`w-8 h-8 rounded-full bg-zinc-500 ${themeColor === "zinc" ? "ring-2 ring-zinc-500 ring-offset-1" : ""}`}
+                    onClick={() => handleThemeColorClick("zinc")}
+                  />
                 </div>
               </div>
             </CardContent>
