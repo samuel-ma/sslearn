@@ -10,7 +10,7 @@ import { DailyChallenge } from "@/components/DailyChallenge"
 import { StudyStreak } from "@/components/StudyStreak"
 import { Banner } from "@/components/Banner"
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, LogIn } from "lucide-react"
 import { FeaturedQuizzesSkeleton } from "@/components/FeaturedQuizzesSkeleton"
 import { StudyMaterialsDashboard } from "@/components/StudyMaterialsDashboard"
 
@@ -25,19 +25,13 @@ const quizzes = [
 export default function Dashboard() {
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(true)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoadingFeatured(false)
-    }, 1500)
-    return () => clearTimeout(timer)
-  }, [])
-
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Welcome to QuizMaster</h1>
-        <p className="text-xl text-gray-600 mb-6">Challenge yourself and learn something new today!</p>
-        <AnalyticsOverview />
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Welcome to SS-Learn</h1>
+          <p className="text-xl text-gray-600">Challenge yourself and learn something new today!</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">

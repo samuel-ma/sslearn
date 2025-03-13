@@ -2,7 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Trophy, Award, Star, Target, Book } from "lucide-react"
+import { Trophy, Award, Star, Target, Book, LogOut } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 interface Achievement {
   id: number
@@ -47,6 +49,13 @@ export function UserProfile({
       default:
         return <Award className="w-4 h-4" />
     }
+  }
+
+  const handleLogout = () => {
+    // Clear auth token
+    localStorage.removeItem('token')
+    // Refresh the page
+    window.location.reload()
   }
 
   return (
@@ -120,6 +129,11 @@ export function UserProfile({
           </div>
         </CardContent>
       </Card>
+
+      <Button variant="outline" size="sm" onClick={handleLogout}>
+        <LogOut className="mr-2 h-4 w-4" />
+        Sign Out
+      </Button>
     </div>
   )
 }
