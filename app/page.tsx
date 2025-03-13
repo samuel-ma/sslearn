@@ -25,6 +25,13 @@ const quizzes = [
 export default function Dashboard() {
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(true)
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoadingFeatured(false)
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -33,6 +40,10 @@ export default function Dashboard() {
           <p className="text-xl text-gray-600">Challenge yourself and learn something new today!</p>
         </div>
       </div>
+
+      <div>
+            <AnalyticsOverview />
+        </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
         <div className="lg:col-span-2 space-y-8">

@@ -109,10 +109,11 @@ export default function TopNav() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="default" size="sm" asChild>
                 <Link href="/auth/login" className="flex items-center">
+                Sign In
                   <LogIn className="mr-2 h-4 w-4" />
-                  Sign In
+                  
                 </Link>
               </Button>
             )}
