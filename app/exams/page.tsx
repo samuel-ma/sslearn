@@ -1,20 +1,21 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import * as React from "react"
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { motion, AnimatePresence } from "framer-motion";
-import { ExamCard } from "@/components/ExamCard";
+} from "@/components/ui/select"
+import { motion, AnimatePresence } from "framer-motion"
+import { ExamCard } from "@/components/ExamCard"
 import {
   Search,
   Filter,
@@ -27,16 +28,34 @@ import {
   Sparkles,
   BarChart,
   TrendingUp,
-} from "lucide-react";
+} from "lucide-react"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/tooltip"
+
+interface Exam {
+  id: string
+  title: string
+  description: string
+  country: string
+  type: string
+  subject: string
+  year: number
+  questions: number
+  duration: string
+  difficulty: string
+  popularity: number
+  passingRate: number
+  featured: boolean
+  level: string
+  educationSystem: string
+}
 
 // Sample exam data with additional fields
-const exams = [
+const exams: Exam[] = [
   {
     id: "ple-2022",
     title: "PLE Mathematics 2022",
@@ -282,56 +301,272 @@ const exams = [
     level: "Preschool",
     educationSystem: "Pre-Primary",
   },
-];
+]
 
 // Unique filter options
-const countries = [...new Set(exams.map((exam) => exam.country))];
-const examTypes = [...new Set(exams.map((exam) => exam.type))];
-const subjects = [...new Set(exams.map((exam) => exam.subject))];
+const countries = [...new Set(exams.map((exam) => exam.country))]
+const examTypes = [...new Set(exams.map((exam) => exam.type))]
+const subjects = [...new Set(exams.map((exam) => exam.subject))]
 const years = [...new Set(exams.map((exam) => exam.year))].sort(
   (a, b) => b - a,
-); // Sort years in descending order
-const difficulties = [...new Set(exams.map((exam) => exam.difficulty))];
-const levels = [...new Set(exams.map((exam) => exam.level))];
+) // Sort years in descending order
+const difficulties = [...new Set(exams.map((exam) => exam.difficulty))]
+const levels = [...new Set(exams.map((exam) => exam.level))]
 const educationSystems = [
   ...new Set(exams.map((exam) => exam.educationSystem)),
-];
+]
+
+const FilterSection = ({
+  showFilters,
+  selectedCountry,
+  setSelectedCountry,
+  selectedType,
+  setSelectedType,
+  selectedSubject,
+  setSelectedSubject,
+  selectedYear,
+  setSelectedYear,
+  selectedDifficulty,
+  setSelectedDifficulty,
+  selectedLevel,
+  setSelectedLevel,
+  selectedEducationSystem,
+  setSelectedEducationSystem,
+  resetFilters,
+  setShowFilters,
+}: FilterSectionProps) => (
+  <motion.div
+    initial={{ opacity: 0, height: 0 }}
+    animate={{ opacity: 1, height: "auto" }}
+    exit={{ opacity: 0, height: 0 }}
+    transition={{ duration: 0.2 }}
+    className="bg-accent/50 rounded-lg p-6 mb-8 overflow-hidden"
+  >
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="space-y-2">
+        <Label htmlFor="country" className="text-sm font-medium">
+          Country
+        </Label>
+        <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+          <SelectTrigger id="country" className="w-full">
+            <SelectValue placeholder="All Countries" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Countries</SelectItem>
+            {countries.map((country) => (
+              <SelectItem key={country} value={country}>
+                {country}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="type" className="text-sm font-medium">
+          Exam Type
+        </Label>
+        <Select value={selectedType} onValueChange={setSelectedType}>
+          <SelectTrigger id="type" className="w-full">
+            <SelectValue placeholder="All Types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            {examTypes.map((type) => (
+              <SelectItem key={type} value={type}>
+                {type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="subject" className="text-sm font-medium">
+          Subject
+        </Label>
+        <Select
+          value={selectedSubject}
+          onValueChange={setSelectedSubject}
+        >
+          <SelectTrigger id="subject" className="w-full">
+            <SelectValue placeholder="All Subjects" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Subjects</SelectItem>
+            {subjects.map((subject) => (
+              <SelectItem key={subject} value={subject}>
+                {subject}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="year" className="text-sm font-medium">
+          Year
+        </Label>
+        <Select
+          value={selectedYear === "" ? "all" : selectedYear.toString()}
+          onValueChange={(value) =>
+            setSelectedYear(value === "all" ? "" : parseInt(value))
+          }
+        >
+          <SelectTrigger id="year" className="w-full">
+            <SelectValue placeholder="All Years" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Years</SelectItem>
+            {years.map((year) => (
+              <SelectItem key={year} value={year.toString()}>
+                {year}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="difficulty" className="text-sm font-medium">
+          Difficulty
+        </Label>
+        <Select
+          value={selectedDifficulty}
+          onValueChange={setSelectedDifficulty}
+        >
+          <SelectTrigger id="difficulty" className="w-full">
+            <SelectValue placeholder="All Difficulties" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Difficulties</SelectItem>
+            {difficulties.map((difficulty) => (
+              <SelectItem key={difficulty} value={difficulty}>
+                {difficulty}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="level" className="text-sm font-medium">
+          Class Level
+        </Label>
+        <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+          <SelectTrigger id="level" className="w-full">
+            <SelectValue placeholder="All Levels" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Levels</SelectItem>
+            {levels.map((level) => (
+              <SelectItem key={level} value={level}>
+                {level}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="educationSystem" className="text-sm font-medium">
+          Education System
+        </Label>
+        <Select
+          value={selectedEducationSystem}
+          onValueChange={setSelectedEducationSystem}
+        >
+          <SelectTrigger id="educationSystem" className="w-full">
+            <SelectValue placeholder="All Education Systems" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Education Systems</SelectItem>
+            {educationSystems.map((system) => (
+              <SelectItem key={system} value={system}>
+                {system}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div className="flex justify-end mt-6 gap-3">
+      <Button 
+        variant="outline" 
+        onClick={resetFilters}
+        className="min-w-[100px]"
+      >
+        <X className="h-4 w-4 mr-2" />
+        Reset
+      </Button>
+      <Button 
+        onClick={() => setShowFilters(false)} 
+        className="min-w-[100px] gap-2"
+      >
+        <Filter className="h-4 w-4" />
+        Apply
+      </Button>
+    </div>
+  </motion.div>
+)
+
+interface FilterSectionProps {
+  showFilters: boolean
+  selectedCountry: string
+  setSelectedCountry: (value: string) => void
+  selectedType: string
+  setSelectedType: (value: string) => void
+  selectedSubject: string
+  setSelectedSubject: (value: string) => void
+  selectedYear: number | ""
+  setSelectedYear: (value: number | "") => void
+  selectedDifficulty: string
+  setSelectedDifficulty: (value: string) => void
+  selectedLevel: string
+  setSelectedLevel: (value: string) => void
+  selectedEducationSystem: string
+  setSelectedEducationSystem: (value: string) => void
+  resetFilters: () => void
+  setShowFilters: (value: boolean) => void
+}
 
 export default function ExamsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState<string>("");
-  const [selectedType, setSelectedType] = useState<string>("");
-  const [selectedSubject, setSelectedSubject] = useState<string>("");
-  const [selectedYear, setSelectedYear] = useState<number | "">("");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("");
-  const [selectedLevel, setSelectedLevel] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCountry, setSelectedCountry] = useState<string>("all")
+  const [selectedType, setSelectedType] = useState<string>("all")
+  const [selectedSubject, setSelectedSubject] = useState<string>("all")
+  const [selectedYear, setSelectedYear] = useState<number | "">("")
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all")
+  const [selectedLevel, setSelectedLevel] = useState<string>("all")
   const [selectedEducationSystem, setSelectedEducationSystem] =
-    useState<string>("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+    useState<string>("all")
+  const [showFilters, setShowFilters] = useState(false)
+  const [activeTab, setActiveTab] = useState("all")
+  const [isLoading, setIsLoading] = useState(true)
+  const [activeFilters, setActiveFilters] = useState<string[]>([])
 
   // Simulate loading state
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+      setIsLoading(false)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [])
 
   // Update active filters for display
   useEffect(() => {
-    const filters: string[] = [];
-    if (selectedCountry) filters.push(`Country: ${selectedCountry}`);
-    if (selectedType) filters.push(`Type: ${selectedType}`);
-    if (selectedSubject) filters.push(`Subject: ${selectedSubject}`);
-    if (selectedYear) filters.push(`Year: ${selectedYear}`);
-    if (selectedDifficulty) filters.push(`Difficulty: ${selectedDifficulty}`);
-    if (selectedLevel) filters.push(`Level: ${selectedLevel}`);
-    if (selectedEducationSystem)
-      filters.push(`Education System: ${selectedEducationSystem}`);
-    setActiveFilters(filters);
+    const filters: string[] = []
+    if (selectedCountry !== "all") filters.push(`Country: ${selectedCountry}`)
+    if (selectedType !== "all") filters.push(`Type: ${selectedType}`)
+    if (selectedSubject !== "all") filters.push(`Subject: ${selectedSubject}`)
+    if (selectedYear) filters.push(`Year: ${selectedYear}`)
+    if (selectedDifficulty !== "all")
+      filters.push(`Difficulty: ${selectedDifficulty}`)
+    if (selectedLevel !== "all") filters.push(`Level: ${selectedLevel}`)
+    if (selectedEducationSystem !== "all")
+      filters.push(`Education System: ${selectedEducationSystem}`)
+    setActiveFilters(filters)
   }, [
     selectedCountry,
     selectedType,
@@ -340,72 +575,70 @@ export default function ExamsPage() {
     selectedDifficulty,
     selectedLevel,
     selectedEducationSystem,
-  ]);
+  ])
 
   // Filter exams based on search and filter criteria
-  const filteredExams = exams.filter((exam) => {
-    const matchesSearch =
-      exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      exam.description.toLowerCase().includes(searchQuery.toLowerCase());
+  const filterResults = React.useCallback(() => {
+    return exams.filter((exam) => {
+      const matchesSearch = searchQuery
+        ? exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          exam.description.toLowerCase().includes(searchQuery.toLowerCase())
+        : true
 
-    const matchesCountry = selectedCountry
-      ? exam.country === selectedCountry
-      : true;
-    const matchesType = selectedType ? exam.type === selectedType : true;
-    const matchesSubject = selectedSubject
-      ? exam.subject === selectedSubject
-      : true;
-    const matchesYear = selectedYear ? exam.year === selectedYear : true;
-    const matchesDifficulty = selectedDifficulty
-      ? exam.difficulty === selectedDifficulty
-      : true;
-    const matchesLevel = selectedLevel ? exam.level === selectedLevel : true;
-    const matchesEducationSystem = selectedEducationSystem
-      ? exam.educationSystem === selectedEducationSystem
-      : true;
+      return (
+        matchesSearch &&
+        (selectedCountry === "all" || exam.country === selectedCountry) &&
+        (selectedType === "all" || exam.type === selectedType) &&
+        (selectedSubject === "all" || exam.subject === selectedSubject) &&
+        (selectedYear === "" || exam.year === selectedYear) &&
+        (selectedDifficulty === "all" || exam.difficulty === selectedDifficulty) &&
+        (selectedLevel === "all" || exam.level === selectedLevel) &&
+        (selectedEducationSystem === "all" || exam.educationSystem === selectedEducationSystem)
+      )
+    })
+  }, [
+    searchQuery,
+    selectedCountry,
+    selectedType,
+    selectedSubject,
+    selectedYear,
+    selectedDifficulty,
+    selectedLevel,
+    selectedEducationSystem,
+  ])
 
-    return (
-      matchesSearch &&
-      matchesCountry &&
-      matchesType &&
-      matchesSubject &&
-      matchesYear &&
-      matchesDifficulty &&
-      matchesLevel &&
-      matchesEducationSystem
-    );
-  });
+  const filteredExams = React.useMemo(() => filterResults(), [filterResults])
 
   // Get exams for different tabs
   const popularExams = [...filteredExams]
     .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
-    .slice(0, 6);
+    .slice(0, 6)
   const recentExams = [...filteredExams]
     .sort((a, b) => b.year - a.year)
-    .slice(0, 6);
+    .slice(0, 6)
   const featuredExams = filteredExams
     .filter((exam) => exam.featured)
-    .slice(0, 6);
+    .slice(0, 6)
 
   const resetFilters = () => {
-    setSelectedCountry("");
-    setSelectedType("");
-    setSelectedSubject("");
-    setSelectedYear("");
-    setSelectedDifficulty("");
-    setSelectedLevel("");
-    setSelectedEducationSystem("");
-  };
+    setSelectedCountry("all")
+    setSelectedType("all")
+    setSelectedSubject("all")
+    setSelectedYear("")
+    setSelectedDifficulty("all")
+    setSelectedLevel("all")
+    setSelectedEducationSystem("all")
+  }
 
   const removeFilter = (filter: string) => {
-    if (filter.startsWith("Country:")) setSelectedCountry("");
-    if (filter.startsWith("Type:")) setSelectedType("");
-    if (filter.startsWith("Subject:")) setSelectedSubject("");
-    if (filter.startsWith("Year:")) setSelectedYear("");
-    if (filter.startsWith("Difficulty:")) setSelectedDifficulty("");
-    if (filter.startsWith("Level:")) setSelectedLevel("");
-    if (filter.startsWith("Education System:")) setSelectedEducationSystem("");
-  };
+    if (filter.startsWith("Country:")) setSelectedCountry("all")
+    if (filter.startsWith("Type:")) setSelectedType("all")
+    if (filter.startsWith("Subject:")) setSelectedSubject("all")
+    if (filter.startsWith("Year:")) setSelectedYear("")
+    if (filter.startsWith("Difficulty:")) setSelectedDifficulty("all")
+    if (filter.startsWith("Level:")) setSelectedLevel("all")
+    if (filter.startsWith("Education System:")) setSelectedEducationSystem("all")
+  }
 
   if (isLoading) {
     return (
@@ -430,7 +663,7 @@ export default function ExamsPage() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -497,159 +730,25 @@ export default function ExamsPage() {
 
       <AnimatePresence>
         {showFilters && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="bg-accent/50 rounded-lg p-4 mb-8 overflow-hidden"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="country">Country</Label>
-                <Select
-                  value={selectedCountry}
-                  onValueChange={setSelectedCountry}
-                >
-                  <SelectTrigger id="country">
-                    <SelectValue placeholder="All Countries" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Countries</SelectItem>
-                    {countries.map((country) => (
-                      <SelectItem key={country} value={country}>
-                        {country}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="type">Exam Type</Label>
-                <Select value={selectedType} onValueChange={setSelectedType}>
-                  <SelectTrigger id="type">
-                    <SelectValue placeholder="All Types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
-                    {examTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="subject">Subject</Label>
-                <Select
-                  value={selectedSubject}
-                  onValueChange={setSelectedSubject}
-                >
-                  <SelectTrigger id="subject">
-                    <SelectValue placeholder="All Subjects" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Subjects</SelectItem>
-                    {subjects.map((subject) => (
-                      <SelectItem key={subject} value={subject}>
-                        {subject}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="year">Year</Label>
-                <Select
-                  value={selectedYear.toString()}
-                  onValueChange={(value) =>
-                    setSelectedYear(value ? parseInt(value) : "")
-                  }
-                >
-                  <SelectTrigger id="year">
-                    <SelectValue placeholder="All Years" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Years</SelectItem>
-                    {years.map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="difficulty">Difficulty</Label>
-                <Select
-                  value={selectedDifficulty}
-                  onValueChange={setSelectedDifficulty}
-                >
-                  <SelectTrigger id="difficulty">
-                    <SelectValue placeholder="All Difficulties" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Difficulties</SelectItem>
-                    {difficulties.map((difficulty) => (
-                      <SelectItem key={difficulty} value={difficulty}>
-                        {difficulty}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="level">Class Level</Label>
-                <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                  <SelectTrigger id="level">
-                    <SelectValue placeholder="All Levels" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Levels</SelectItem>
-                    {levels.map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="educationSystem">Education System</Label>
-                <Select
-                  value={selectedEducationSystem}
-                  onValueChange={setSelectedEducationSystem}
-                >
-                  <SelectTrigger id="educationSystem">
-                    <SelectValue placeholder="All Education Systems" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Education Systems</SelectItem>
-                    {educationSystems.map((system) => (
-                      <SelectItem key={system} value={system}>
-                        {system}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex justify-end mt-4">
-              <Button variant="outline" onClick={resetFilters} className="mr-2">
-                Reset Filters
-              </Button>
-              <Button onClick={() => setShowFilters(false)}>
-                Apply Filters
-              </Button>
-            </div>
-          </motion.div>
+          <FilterSection
+            showFilters={showFilters}
+            selectedCountry={selectedCountry}
+            setSelectedCountry={setSelectedCountry}
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+            selectedSubject={selectedSubject}
+            setSelectedSubject={setSelectedSubject}
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+            selectedDifficulty={selectedDifficulty}
+            setSelectedDifficulty={setSelectedDifficulty}
+            selectedLevel={selectedLevel}
+            setSelectedLevel={setSelectedLevel}
+            selectedEducationSystem={selectedEducationSystem}
+            setSelectedEducationSystem={setSelectedEducationSystem}
+            resetFilters={resetFilters}
+            setShowFilters={setShowFilters}
+          />
         )}
       </AnimatePresence>
 
@@ -797,5 +896,5 @@ export default function ExamsPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
