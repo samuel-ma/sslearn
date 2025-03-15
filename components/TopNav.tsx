@@ -46,7 +46,7 @@ export default function TopNav() {
                 className="w-64"
               />
             </div>
-            
+
           <div className="flex items-center space-x-2 md:space-x-4">
             
             <ThemeToggle />
