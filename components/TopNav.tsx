@@ -15,10 +15,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ThemeToggle } from "@/components/ThemeToggle"
+import SearchAutocomplete from "./SearchAutocomplete"
 
 export default function TopNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const router = useRouter()
 
@@ -30,14 +30,6 @@ export default function TopNav() {
     checkAuth()
   }, [])
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
-      setSearchQuery("") // Clear the input after search
-    }
-  }
-
   return (
     <nav className="bg-background border-b shadow-sm fixed top-0 left-0 right-0 z-50">
       <div className="w-full px-4">
@@ -47,17 +39,16 @@ export default function TopNav() {
               <span className="text-xl font-bold text-primary">🌍 ss-Learn</span>
             </Link>
           </div>
-          <div className="flex items-center space-x-2 md:space-x-4">
-            <form onSubmit={handleSearch} className="relative hidden md:block">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search quizzes..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-64"
+
+          <div className="hidden md:block">
+              <SearchAutocomplete 
+                placeholder="Search quizzes, subjects, exams..."
+                className="w-64"
               />
-            </form>
+            </div>
+            
+          <div className="flex items-center space-x-2 md:space-x-4">
+            
             <ThemeToggle />
             {isAuthenticated && (
               <Button variant="ghost" size="icon" asChild className="hidden md:flex">

@@ -21,10 +21,77 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {},
+  );
+  const [touched, setTouched] = useState<{
+    email?: boolean;
+    password?: boolean;
+  }>({});
   const router = useRouter();
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password: string) => {
+    return password.length >= 6;
+  };
+
+  const handleBlur = (field: "email" | "password") => {
+    setTouched({ ...touched, [field]: true });
+
+    if (field === "email") {
+      if (!email) {
+        setErrors({ ...errors, email: "Email is required" });
+      } else if (!validateEmail(email)) {
+        setErrors({ ...errors, email: "Please enter a valid email" });
+      } else {
+        setErrors({ ...errors, email: undefined });
+      }
+    }
+
+    if (field === "password") {
+      if (!password) {
+        setErrors({ ...errors, password: "Password is required" });
+      } else if (!validatePassword(password)) {
+        setErrors({
+          ...errors,
+          password: "Password must be at least 6 characters",
+        });
+      } else {
+        setErrors({ ...errors, password: undefined });
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate all fields before submission
+    const newErrors: { email?: string; password?: string } = {};
+
+    if (!email) {
+      newErrors.email = "Email is required";
+    } else if (!validateEmail(email)) {
+      newErrors.email = "Please enter a valid email";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (!validatePassword(password)) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    setErrors(newErrors);
+    setTouched({ email: true, password: true });
+
+    // If there are errors, don't proceed
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
+
     setIsLoading(true);
 
     // Here you would typically handle authentication
@@ -35,6 +102,13 @@ export default function LoginPage() {
     }, 1000);
   };
 
+  const getInputClassName = (field: "email" | "password") => {
+    if (!touched[field]) return "";
+    return errors[field]
+      ? "border-red-500 focus-visible:ring-red-500"
+      : "border-green-500 focus-visible:ring-green-500";
+  };
+
   return (
     <div className="flex items-center justify-center mt-16">
       <Card className="w-full max-w-md mx-auto">
@@ -42,9 +116,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <span className="text-4xl">ت</span>
           </div>
-          <CardTitle className="sstext-2xl font-bold">
-            Sign In
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
           <CardDescription className="text-gray-400">
             Welcome back! Sign in to continue
           </CardDescription>
@@ -61,7 +133,7 @@ export default function LoginPage() {
                 <Separator className="w-full" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="px-2 font-bold">
+                <span className="px-2 font-bold bg-background">
                   Or continue With
                 </span>
               </div>
@@ -79,9 +151,13 @@ export default function LoginPage() {
                     placeholder="name@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => handleBlur("email")}
                     required
-                    className=""
+                    className={getInputClassName("email")}
                   />
+                  {touched.email && errors.email && (
+                    <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -98,18 +174,20 @@ export default function LoginPage() {
                   <Input
                     id="password"
                     type="password"
-                    value={password}
                     placeholder="*****"
+                    value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onBlur={() => handleBlur("password")}
                     required
-                    className=""
+                    className={getInputClassName("password")}
                   />
+                  {touched.password && errors.password && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.password}
+                    </p>
+                  )}
                 </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading}
-                >
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Signing in..." : "Continue"}
                 </Button>
               </div>

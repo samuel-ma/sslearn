@@ -19,10 +19,41 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+  const [touched, setTouched] = useState(false);
   const router = useRouter();
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleBlur = () => {
+    setTouched(true);
+
+    if (!email) {
+      setError("Email is required");
+    } else if (!validateEmail(email)) {
+      setError("Please enter a valid email");
+    } else {
+      setError(undefined);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate email before submission
+    if (!email) {
+      setError("Email is required");
+      setTouched(true);
+      return;
+    } else if (!validateEmail(email)) {
+      setError("Please enter a valid email");
+      setTouched(true);
+      return;
+    }
+
     setIsLoading(true);
 
     // Here you would typically handle password reset
@@ -31,6 +62,13 @@ export default function ForgotPasswordPage() {
       setIsLoading(false);
       setIsSubmitted(true);
     }, 1000);
+  };
+
+  const getInputClassName = () => {
+    if (!touched) return "";
+    return error
+      ? "border-red-500 focus-visible:ring-red-500"
+      : "border-green-500 focus-visible:ring-green-500";
   };
 
   return (
@@ -73,15 +111,15 @@ export default function ForgotPasswordPage() {
                   placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onBlur={handleBlur}
                   required
-                  className=""
+                  className={getInputClassName()}
                 />
+                {touched && error && (
+                  <p className="text-sm text-red-500 mt-1">{error}</p>
+                )}
               </div>
-              <Button
-                type="submit"
-                className="w-full "
-                disabled={isLoading}
-              >
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Sending..." : "Send Reset Link"}
               </Button>
             </form>
