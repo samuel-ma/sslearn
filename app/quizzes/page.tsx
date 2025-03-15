@@ -299,106 +299,73 @@ export default function QuizzesPage() {
         </p>
       </motion.section>
 
-      {/* Filters Section - Minimalist Design */}
+      {/* Simplified Filters Section */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="mb-8 space-y-4 bg-card rounded-lg p-4 shadow-sm"
+        className="mb-8"
       >
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative w-full md:w-1/2">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               type="text"
               placeholder="Search quizzes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-full bg-background border-muted"
+              className="pl-9 w-full bg-background"
             />
           </div>
-          <div className="flex gap-2 w-full md:w-1/2">
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full bg-background border-muted">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="popularity">Most Popular</SelectItem>
-                <SelectItem value="rating">Highest Rated</SelectItem>
-                <SelectItem value="newest">Newest</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              variant={showRecommended ? "default" : "outline"}
-              onClick={() => setShowRecommended(!showRecommended)}
-              className="whitespace-nowrap"
-            >
-              {showRecommended ? "All Quizzes" : "Recommended"}
-            </Button>
-          </div>
-        </div>
+          
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger>
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium">Categories</h3>
-          <div className="flex gap-2 flex-wrap">
-            {categories.map((cat) => (
-              <motion.div
-                key={cat}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  variant={filterCategory === cat ? "default" : "outline"}
-                  onClick={() => setFilterCategory(cat)}
-                  size="sm"
-                  className="capitalize text-xs h-8"
-                >
-                  {cat}
-                </Button>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+          <Select value={filterDifficulty} onValueChange={setFilterDifficulty}>
+            <SelectTrigger>
+              <SelectValue placeholder="Difficulty" />
+            </SelectTrigger>
+            <SelectContent>
+              {difficulties.map((diff) => (
+                <SelectItem key={diff} value={diff}>{diff}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium">Difficulty</h3>
-          <div className="flex gap-2 flex-wrap">
-            {difficulties.map((diff) => (
-              <motion.div
-                key={diff}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  key={diff}
-                  variant={filterDifficulty === diff ? "default" : "outline"}
-                  onClick={() => setFilterDifficulty(diff)}
-                  size="sm"
-                  className={`capitalize text-xs h-8 ${
-                    diff === "Easy"
-                      ? "text-green-500 border-green-200 hover:bg-green-50 hover:text-green-600"
-                      : diff === "Medium"
-                        ? "text-amber-500 border-amber-200 hover:bg-amber-50 hover:text-amber-600"
-                        : diff === "Hard"
-                          ? "text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
-                          : ""
-                  }`}
-                >
-                  {diff}
-                </Button>
-              </motion.div>
-            ))}
-          </div>
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger>
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="popularity">Most Popular</SelectItem>
+              <SelectItem value="rating">Highest Rated</SelectItem>
+              <SelectItem value="newest">Newest</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </motion.section>
 
-      {/* Quizzes Grid - Minimalist Design */}
+      {/* Quizzes Grid - Updated Card Design */}
       <motion.section
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <h2 className="text-xl font-medium mb-6">Available Quizzes</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-medium">Available Quizzes</h2>
+          <p className="text-sm text-muted-foreground">
+            {filteredQuizzes.length} {filteredQuizzes.length === 1 ? 'quiz' : 'quizzes'} found
+          </p>
+        </div>
+
         {filteredQuizzes.length === 0 ? (
           <div className="text-center py-12 bg-card rounded-lg">
             <p className="text-muted-foreground">
@@ -425,30 +392,16 @@ export default function QuizzesPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                whileHover={{ y: -2, transition: { duration: 0.2 } }}
               >
-                <Card className="h-full flex flex-col bg-card border-muted hover:border-primary/20 transition-all duration-300">
-                  {quiz.recommended && (
-                    <div className="bg-primary/10 text-primary text-xs py-1 px-3 text-center font-medium">
-                      Recommended for you
-                    </div>
-                  )}
+                <Card className="h-full flex flex-col bg-card hover:shadow-md transition-all duration-300">
                   <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-start gap-2">
                       <CardTitle className="flex items-center text-xl">
                         <span className="text-2xl mr-2">{quiz.icon}</span>
                         {quiz.title}
                       </CardTitle>
-                      <Badge
-                        variant="outline"
-                        className={`ml-2 ${
-                          quiz.difficulty === "Easy"
-                            ? "text-green-500 border-green-200 bg-green-50"
-                            : quiz.difficulty === "Medium"
-                              ? "text-amber-500 border-amber-200 bg-amber-50"
-                              : "text-red-500 border-red-200 bg-red-50"
-                        }`}
-                      >
+                      <Badge variant="secondary" className="text-xs">
                         {quiz.difficulty}
                       </Badge>
                     </div>
