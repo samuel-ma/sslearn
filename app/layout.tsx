@@ -6,13 +6,12 @@ import TopNav from "@/components/TopNav";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import "@/styles/globals.css";
 import type React from "react";
-import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "QuizMaster",
-  description: "A beautiful and engaging quiz application",
+  title: "ss-Learn",
+  description: "A beautiful and engaging learning platform for students",
   generator: "v0.dev",
 };
 
@@ -24,7 +23,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <body className={`flex ${inter.className}`}>
-        <Script src="https://api.tempolabs.ai/proxy-asset?url=https://storage.googleapis.com/tempo-public-assets/error-handling.js" />
         <main className="flex-1">
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <div className="min-h-screen bg-background flex flex-col">

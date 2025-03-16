@@ -15,14 +15,14 @@ import {
   Compass,
   Lightbulb,
   Users,
-  GraduationCap,
+  FileText,
 } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: Home },
   { href: "/learn", label: "Learning Hub", icon: Compass },
   { href: "/quizzes", label: "Quizzes", icon: Zap },
-  { href: "/exams", label: "Exams", icon: GraduationCap },
+  { href: "/exams", label: "Exams", icon: FileText },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/history", label: "Quiz History", icon: History },
   { href: "/analytics", label: "Analytics", icon: BarChart },
