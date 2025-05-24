@@ -16,11 +16,15 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { FcGoogle } from "react-icons/fc";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {},
   );
@@ -66,6 +70,8 @@ export default function LoginPage() {
     }
   };
 
+  const { signIn, signInWithGoogle } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -94,12 +100,38 @@ export default function LoginPage() {
 
     setIsLoading(true);
 
-    // Here you would typically handle authentication
-    // For now, we'll just simulate a login
-    setTimeout(() => {
+    try {
+      console.log('Attempting to sign in with:', email);
+      const { error, data } = await signIn(email, password);
+      
+      if (error) {
+        console.error('Login error:', error);
+        toast.error(error.message || 'Failed to sign in', {
+          position: 'top-center',
+          duration: 4000,
+          description: 'Please check your credentials and try again.'
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('Login successful, user:', data.user?.id);
+      toast.success('Signed in successfully!', {
+        position: 'top-center',
+        duration: 3000,
+        description: 'Welcome back to ss-Learn!'
+      });
+      
+      // Ensure we navigate to the main page after successful login
+      setTimeout(() => {
+        router.push('/');
+        router.refresh(); // Force refresh to update the UI with the logged-in state
+      }, 1000);
+    } catch (error: any) {
+      console.error('Unexpected login error:', error);
+      toast.error(error.message || 'An unexpected error occurred');
       setIsLoading(false);
-      router.push("/");
-    }, 1000);
+    }
   };
 
   const getInputClassName = (field: "email" | "password") => {
@@ -123,7 +155,12 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Button variant="default" className="w-full" type="button">
+            <Button 
+              variant="default" 
+              className="w-full" 
+              type="button"
+              onClick={() => signInWithGoogle()}
+            >
               <FcGoogle className="mr-2 h-4 w-4" />
               Google
             </Button>
@@ -171,16 +208,32 @@ export default function LoginPage() {
                       Forgot your Password?
                     </Link>
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="*****"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onBlur={() => handleBlur("password")}
-                    required
-                    className={getInputClassName("password")}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="*****"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onBlur={() => handleBlur("password")}
+                      required
+                      className={getInputClassName("password")}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full px-3"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
                   {touched.password && errors.password && (
                     <p className="text-sm text-red-500 mt-1">
                       {errors.password}

@@ -100,3 +100,161 @@
   }
 }
 
+
+/* Enhanced sidebar styles for perfect collapsed state */
+@layer components {
+  /* Sidebar width customization */
+  [data-sidebar="sidebar"] {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Perfect collapsed state styling */
+  [data-sidebar="sidebar"][data-collapsible="icon"] {
+    width: 4.5rem !important;
+  }
+
+  /* Menu button centering in collapsed state */
+  [data-sidebar="sidebar"][data-collapsible="icon"] [data-sidebar="menu-button"] {
+    @apply flex items-center justify-center;
+    width: 3rem !important;
+    height: 3rem !important;
+    margin: 0 auto;
+    padding: 0 !important;
+  }
+
+  /* Icon container centering */
+  [data-sidebar="sidebar"][data-collapsible="icon"] [data-sidebar="menu-button"] > * {
+    @apply flex items-center justify-center;
+  }
+
+  /* Hide text and badges in collapsed state */
+  [data-sidebar="sidebar"][data-collapsible="icon"] [data-sidebar="menu-button"] span:not(.sr-only),
+  [data-sidebar="sidebar"][data-collapsible="icon"] [data-sidebar="menu-button"] .ml-auto,
+  [data-sidebar="sidebar"][data-collapsible="icon"]
+    [data-sidebar="menu-button"]
+    .group-data-\[collapsible\=icon\]\:hidden {
+    @apply hidden;
+  }
+
+  /* Header logo centering */
+  [data-sidebar="sidebar"][data-collapsible="icon"] [data-sidebar="header"] [data-sidebar="menu-button"] {
+    @apply justify-center;
+    width: 3rem !important;
+    height: 3rem !important;
+  }
+
+  /* Footer user button centering */
+  [data-sidebar="sidebar"][data-collapsible="icon"] [data-sidebar="footer"] [data-sidebar="menu-button"] {
+    @apply justify-center;
+    width: 3rem !important;
+    height: 3rem !important;
+  }
+
+  /* Ensure icons are perfectly centered */
+  [data-sidebar="sidebar"][data-collapsible="icon"] [data-sidebar="menu-button"] svg {
+    @apply mx-auto;
+    flex-shrink: 0;
+  }
+
+  /* Active state styling for collapsed buttons */
+  [data-sidebar="sidebar"][data-collapsible="icon"] [data-sidebar="menu-button"][data-active="true"] {
+    @apply bg-primary/15 border border-primary/30 text-primary;
+  }
+
+  /* Hover effects for collapsed state */
+  [data-sidebar="sidebar"][data-collapsible="icon"] [data-sidebar="menu-button"]:hover {
+    @apply bg-accent/80 scale-105;
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Smooth transitions for all interactive elements */
+  [data-sidebar="menu-button"] {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Enhanced tooltip positioning for collapsed state */
+  [data-sidebar="sidebar"][data-collapsible="icon"] [data-sidebar="menu-button"][data-tooltip] {
+    position: relative;
+  }
+}
+
+/* Additional enhancements for better visual hierarchy */
+@layer utilities {
+  .sidebar-gradient {
+    background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.3) 100%);
+  }
+
+  .icon-container {
+    @apply flex items-center justify-center w-6 h-6 shrink-0;
+  }
+
+  .nav-separator {
+    @apply relative my-8;
+  }
+
+  .nav-separator::before {
+    content: "";
+    @apply absolute inset-0 flex items-center;
+  }
+
+  .nav-separator::after {
+    content: "";
+    @apply w-full border-t border-border/40;
+  }
+  
+  /* Responsive padding for main content based on sidebar state */
+  .sidebar-content {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .sidebar-content-collapsed {
+    padding-left: 5.5rem;
+  }
+  
+  .sidebar-content-expanded {
+    padding-left: 17rem;
+  }
+  
+  /* Improved theme toggle styles */
+  .theme-toggle {
+    @apply relative overflow-hidden rounded-full transition-all duration-300;
+  }
+  
+  .theme-toggle:hover {
+    transform: scale(1.05);
+  }
+  
+  .theme-toggle-dark {
+    @apply bg-slate-800 text-yellow-400;
+  }
+  
+  .theme-toggle-light {
+    @apply bg-blue-100 text-blue-600;
+  }
+  
+  /* Enhanced dropdown styles */
+  .enhanced-dropdown {
+    @apply rounded-xl border border-border/50 shadow-lg backdrop-blur-sm;
+    animation: dropdown-appear 0.2s ease-out;
+  }
+  
+  .dropdown-item {
+    @apply rounded-lg transition-all duration-200;
+  }
+  
+  .dropdown-item:hover {
+    @apply bg-accent/70;
+  }
+  
+  /* Animations */
+  @keyframes dropdown-appear {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

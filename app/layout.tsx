@@ -1,44 +1,45 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import LeftNav from "@/components/LeftNav";
-import TopNav from "@/components/TopNav";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import "@/styles/globals.css";
-import type React from "react";
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import "./globals.css"
+import { ThemeProvider } from "@/components/ThemeProvider"
+import "@/styles/globals.css"
+import type React from "react"
+import { AuthProvider } from "@/context/AuthContext"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import LeftNav from "@/components/LeftNav"
+import TopNav from "@/components/TopNav"
+import { Suspense } from "react"
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "ss-Learn",
+  title: "SS-Learn",
   description: "A beautiful and engaging learning platform for students",
   generator: "v0.dev",
-};
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <html lang="en" className={inter.className}>
-      <body className={`flex ${inter.className}`}>
-        <main className="flex-1">
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <div className="min-h-screen bg-background flex flex-col">
-              <TopNav />
-              <div className="flex flex-1 pt-16">
-                <aside className="w-64 hidden md:block bg-card border-r border-border">
-                  <LeftNav />
-                </aside>
-                <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-                  {children}
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <AuthProvider>
+            <SidebarProvider>
+              <LeftNav />
+              <SidebarInset>
+                <TopNav />
+                <main className="flex-1 p-4 md:p-6 overflow-y-auto sidebar-content">
+                  <Suspense>{children}</Suspense>
                 </main>
-              </div>
-            </div>
-          </ThemeProvider>
-        </main>
+              </SidebarInset>
+            </SidebarProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }

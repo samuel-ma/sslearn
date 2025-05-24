@@ -17,12 +17,16 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { IoLogoFacebook } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function SignupPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{
     firstName?: string;
@@ -109,6 +113,8 @@ export default function SignupPage() {
     }
   };
 
+  const { signUp, signInWithGoogle } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -160,12 +166,52 @@ export default function SignupPage() {
 
     setIsLoading(true);
 
-    // Here you would typically handle registration
-    // For now, we'll just simulate a signup
-    setTimeout(() => {
+    try {
+      console.log("Attempting to sign up with:", { email, firstName, lastName });
+      const { error, data } = await signUp(email, password, {
+        firstName,
+        lastName,
+      });
+
+      if (error) {
+        console.error("Signup error:", error);
+        toast.error(error.message || "Failed to create account", {
+          position: "top-center",
+          duration: 4000,
+          description: "Please check your information and try again."
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("Signup successful:", data);
+
+      // Check if email confirmation is required
+      if (data?.user && !data.user.confirmed_at) {
+        toast.success(
+          "Account created successfully!", {
+            position: "top-center",
+            duration: 5000,
+            description: "Please check your email to confirm your account."
+          }
+        );
+      } else {
+        toast.success("Account created successfully!", {
+          position: "top-center",
+          duration: 3000,
+          description: "Welcome to ss-Learn! You can now sign in."
+        });
+      }
+
+      // Redirect to login page after successful signup
+      setTimeout(() => {
+        router.push("/auth/login");
+      }, 1500);
+    } catch (error: any) {
+      console.error("Unexpected signup error:", error);
+      toast.error(error.message || "An unexpected error occurred");
       setIsLoading(false);
-      router.push("/");
-    }, 1000);
+    }
   };
 
   const getInputClassName = (
@@ -193,13 +239,23 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Button variant="default" className="w-full" type="button">
+            <div className="flex gap-4 w-full">
+              <Button
+                variant="default"
+                className="w-full"
+                type="button"
+                onClick={() => signInWithGoogle()}
+              >
                 <FcGoogle className="mr-2 h-4 w-4" />
                 Google
               </Button>
-              <Button variant="default" className="w-full" type="button">
-                <IoLogoFacebook className="mr-2 h-4 w-4" />
+              <Button
+                variant="default"
+                className="w-full"
+                type="button"
+                onClick={() => toast.info("Facebook authentication will be implemented soon")}
+              >
+                <IoLogoFacebook className="mr-2 h-4 w-4 text-blue-600" />
                 Facebook
               </Button>
             </div>
@@ -281,16 +337,32 @@ export default function SignupPage() {
                   <Label htmlFor="password" className="">
                     Password
                   </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="*****"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onBlur={() => handleBlur("password")}
-                    required
-                    className={getInputClassName("password")}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="*****"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onBlur={() => handleBlur("password")}
+                      required
+                      className={getInputClassName("password")}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full px-3"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
                   {touched.password && errors.password && (
                     <p className="text-sm text-red-500 mt-1">
                       {errors.password}
