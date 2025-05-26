@@ -6,8 +6,8 @@ import "@/styles/globals.css"
 import type React from "react"
 import { AuthProvider } from "@/context/AuthContext"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import LeftNav from "@/components/LeftNav"
-import TopNav from "@/components/TopNav"
+import { SSLearnSidebar } from "@/components/SSLearnSidebar"
+import SSLearnTopNav from "@/components/SSLearnTopNav"
 import { Suspense } from "react"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -29,9 +29,9 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
             <SidebarProvider>
-              <LeftNav />
+              <SSLearnSidebar />
               <SidebarInset>
-                <TopNav />
+                <SSLearnTopNav />
                 <main className="flex-1 p-4 md:p-6 overflow-y-auto sidebar-content">
                   <Suspense>{children}</Suspense>
                 </main>
