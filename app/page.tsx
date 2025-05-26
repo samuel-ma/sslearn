@@ -130,11 +130,11 @@ export default function Dashboard() {
                     </p>
                     
                     <div className="flex flex-wrap gap-3">
-                    <button className="bg-yellow-400 hover:bg-yellow-300 text-blue-900 px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center gap-2">
+                    <button className="bg-yellow-400 hover:bg-yellow-300 text-blue-900 px-6 py-2 rounded-full font-bold text-sm transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center gap-2">
                         Start Learning Free
                         <ArrowRight className="w-4 h-4" />
                     </button>
-                    <button className="border-2 border-white hover:bg-white hover:text-blue-600 px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300">
+                    <button className="border-2 border-white hover:bg-white hover:text-blue-600 px-6 py-2 rounded-full font-bold text-sm transition-all duration-300">
                         Browse Courses
                     </button>
                     </div>
