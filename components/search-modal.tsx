@@ -2,9 +2,8 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Search, BookOpen, Brain, Video, FileText, Trophy, X, Clock, ArrowRight } from "lucide-react"
+import { Dialog, DialogContent, DialogOverlay, DialogTitle } from "@/components/ui/dialog"
+import { Search, BookOpen, Brain, Video, FileText, Trophy, X, Clock, ChevronRight, Loader2, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface SearchModalProps {
@@ -12,201 +11,357 @@ interface SearchModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-const searchCategories = [
-  { id: "all", name: "All", icon: Search },
-  { id: "courses", name: "Courses", icon: BookOpen },
-  { id: "quizzes", name: "Quizzes", icon: Brain },
-  { id: "videos", name: "Videos", icon: Video },
-  { id: "documents", name: "Documents", icon: FileText },
-  { id: "achievements", name: "Achievements", icon: Trophy },
-]
+interface SearchResult {
+  id: number
+  title: string
+  url: string
+  category?: string
+  description?: string
+  type?: 'course' | 'quiz' | 'video' | 'document' | 'achievement'
+  keyValue?: string
+}
 
 const recentSearches = [
-  "Advanced Physics",
-  "Data Structures Quiz",
-  "Machine Learning Course",
-  "Biology Exam Prep",
+  { query: "Advanced Physics", timestamp: "2 hours ago" },
+  { query: "Data Structures Quiz", timestamp: "1 day ago" },
+  { query: "Machine Learning", timestamp: "3 days ago" },
+  { query: "Biology Exam Prep", timestamp: "1 week ago" },
 ]
 
-const popularSearches = [
+const popularContent = [
   { 
-    title: "Chemistry Fundamentals",
-    type: "Course",
+    id: 1,
+    title: "Chemistry Fundamentals", 
+    type: "course" as const,
     icon: BookOpen,
+    category: "Science",
+    description: "Learn the basics of chemistry with interactive lessons",
     url: "/learn/chemistry-fundamentals"
   },
   { 
-    title: "Python Programming",
-    type: "Quiz",
+    id: 2,
+    title: "Python Programming", 
+    type: "quiz" as const,
     icon: Brain,
+    category: "Programming",
+    description: "Test your Python knowledge with challenging questions",
     url: "/quizzes/python-programming"
   },
   { 
-    title: "Calculus 101",
-    type: "Video",
+    id: 3,
+    title: "Calculus 101", 
+    type: "video" as const,
     icon: Video,
+    category: "Mathematics",
+    description: "Comprehensive video series on calculus fundamentals",
     url: "/learn/calculus-101"
   },
   { 
-    title: "History of Science",
-    type: "Document",
+    id: 4,
+    title: "History of Science", 
+    type: "document" as const,
     icon: FileText,
+    category: "History",
+    description: "Detailed document covering major scientific discoveries",
     url: "/resources/history-of-science"
   },
 ]
 
 export function SearchModal({ open, onOpenChange }: SearchModalProps) {
-  const [activeCategory, setActiveCategory] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [query, setQuery] = useState("")
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [activeIndex, setActiveIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Focus input when modal opens
+  // Reset state when modal opens/closes
   useEffect(() => {
-    if (open && inputRef.current) {
+    if (!open) {
+      setQuery("")
+      setResults([])
+      setError(null)
+      setActiveIndex(-1)
+    } else {
       setTimeout(() => {
         inputRef.current?.focus()
       }, 100)
     }
   }, [open])
 
-  // Clear search when modal closes
+  // Simulate search functionality
   useEffect(() => {
-    if (!open) {
-      setSearchQuery("")
+    const fetchResults = async () => {
+      if (!query || query.length < 2) {
+        setResults([])
+        setError(null)
+        setActiveIndex(-1)
+        return
+      }
+
+      setIsLoading(true)
+      setError(null)
+      
+      try {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 300))
+        
+        // Filter popular content based on query
+        const filteredResults = popularContent.filter(item =>
+          item.title.toLowerCase().includes(query.toLowerCase()) ||
+          item.description.toLowerCase().includes(query.toLowerCase()) ||
+          item.category.toLowerCase().includes(query.toLowerCase())
+        ).map(item => ({
+          ...item,
+          url: item.url
+        }))
+
+        setResults(filteredResults)
+      } catch (error) {
+        console.error("Error fetching search results:", error)
+        setError("Failed to load search results. Please try again.")
+      } finally {
+        setIsLoading(false)
+        setActiveIndex(-1)
+      }
     }
-  }, [open])
+
+    const debounceTimer = setTimeout(fetchResults, 300)
+    return () => clearTimeout(debounceTimer)
+  }, [query])
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!open) return
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        if (results.length > 0) {
+          setActiveIndex(prevIndex => (prevIndex + 1) % results.length)
+        } else if (!query && popularContent.length > 0) {
+          setActiveIndex(prevIndex => (prevIndex + 1) % popularContent.length)
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        if (results.length > 0) {
+          setActiveIndex(prevIndex => (prevIndex - 1 + results.length) % results.length)
+        } else if (!query && popularContent.length > 0) {
+          setActiveIndex(prevIndex => (prevIndex - 1 + popularContent.length) % popularContent.length)
+        }
+      } else if (e.key === 'Enter' && activeIndex >= 0) {
+        e.preventDefault()
+        if (results.length > 0) {
+          handleSelect(results[activeIndex])
+        } else if (!query && popularContent.length > 0) {
+          handleSelect(popularContent[activeIndex])
+        }
+      } else if (e.key === 'Escape') {
+        onOpenChange(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [open, results, activeIndex, onOpenChange, query])
+
+  const handleSelect = (result: SearchResult) => {
+    onOpenChange(false)
+    // Here you would typically navigate to the result URL
+    console.log("Navigating to:", result.url)
+  }
+
+  const getIconForType = (type?: string) => {
+    switch(type) {
+      case 'course': return <BookOpen className="h-5 w-5 text-green-500" />
+      case 'quiz': return <Brain className="h-5 w-5 text-purple-500" />
+      case 'video': return <Video className="h-5 w-5 text-red-500" />
+      case 'document': return <FileText className="h-5 w-5 text-orange-500" />
+      case 'achievement': return <Trophy className="h-5 w-5 text-yellow-500" />
+      default: return <FileText className="h-5 w-5 text-gray-400" />
+    }
+  }
+
+  // Group results by category
+  const groupedResults = results.reduce((groups, item) => {
+    const category = item.category || 'Other'
+    if (!groups[category]) {
+      groups[category] = []
+    }
+    groups[category].push(item)
+    return groups
+  }, {} as Record<string, SearchResult[]>)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] p-0 gap-0 border rounded-xl overflow-hidden shadow-lg">
-        <div className="relative p-3 border-b bg-muted/30">
-          <div className="relative flex items-center">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
+      <DialogOverlay className="backdrop-blur-sm" />
+      <DialogContent className="p-0 border-none max-w-2xl mx-auto">
+        <DialogTitle className="sr-only">Search Learning Materials</DialogTitle>
+        <div className="mx-auto w-full max-w-3xl divide-y divide-gray-100 overflow-hidden rounded-xl bg-white">
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
+            <input
               ref={inputRef}
-              placeholder="Search for anything..."
-              className="pl-10 pr-10 h-10 bg-background border-muted focus-visible:ring-primary/20 focus-visible:ring-offset-0"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              type="text"
+              className="h-12 w-full border-0 bg-transparent pl-11 pr-12 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none sm:text-sm"
+              placeholder="Search for courses, quizzes, videos, and documents..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-0 top-1/2 h-8 w-8 -translate-y-1/2 hover:bg-muted"
-                onClick={() => setSearchQuery("")}
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Clear search</span>
-              </Button>
+            {isLoading && <Loader2 className="absolute right-12 top-3.5 h-5 w-5 animate-spin text-gray-400" />}
+          </div>
+
+          {/* Results Area */}
+          <div className="max-h-[70vh] overflow-y-auto">
+            {error && (
+              <div className="p-6 text-center min-h-[200px] flex flex-col items-center justify-center">
+                <AlertCircle className="h-10 w-10 text-red-500 mb-2" />
+                <p className="text-sm font-medium text-red-600 mb-1">Search Error</p>
+                <p className="text-sm text-gray-500">{error}</p>
+              </div>
+            )}
+
+            {!error && query.length > 0 && query.length < 2 && (
+              <div className="p-6 text-center min-h-[200px] flex flex-col items-center justify-center">
+                <p className="text-sm text-gray-500">
+                  Keep typing to see results... (min. 2 characters)
+                </p>
+              </div>
+            )}
+
+            {!error && query.length >= 2 && !isLoading && results.length === 0 && (
+              <div className="p-10 text-center min-h-[200px] flex flex-col items-center justify-center">
+                <Search className="h-12 w-12 text-gray-400 mb-3" />
+                <p className="text-lg font-medium text-gray-900">No results found for &ldquo;{query}&rdquo;</p>
+                <p className="text-sm text-gray-500">Try different keywords or browse popular content below.</p>
+              </div>
+            )}
+
+            {isLoading && (
+              <div className="p-10 text-center min-h-[200px] flex flex-col items-center justify-center">
+                <Loader2 className="h-12 w-12 text-gray-400 mb-3 animate-spin" />
+                <p className="text-lg font-medium text-gray-900">Searching...</p>
+                <p className="text-sm text-gray-500">Looking for results matching &ldquo;{query}&rdquo;</p>
+              </div>
+            )}
+
+            {results.length > 0 && !error && !isLoading && (
+              <div className="max-h-[60vh] overflow-y-auto min-h-[200px]">
+                {Object.entries(groupedResults).map(([category, items]) => (
+                  <div key={category} className="mb-4 last:mb-0">
+                    <h3 className="text-xs font-medium text-gray-500 px-4 py-2 border-b border-gray-100">
+                      {category}
+                    </h3>
+                    <ul className="py-1">
+                      {items.map((item) => {
+                        const isActive = activeIndex === results.findIndex(r => r.id === item.id)
+                        return (
+                          <li
+                            key={item.id}
+                            onClick={() => handleSelect(item)}
+                            className={cn(
+                              "flex cursor-pointer items-center justify-between px-4 py-3 hover:bg-blue-50/60",
+                              isActive && "bg-blue-50 border-l-2 border-blue-500"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="flex-shrink-0 p-1.5 rounded-md bg-gray-50 border border-gray-100">
+                                {getIconForType(item.type)}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{item.title}</p>
+                                {item.description && (
+                                  <p className="text-xs text-gray-500">{item.description}</p>
+                                )}
+                              </div>
+                            </div>
+                            <ChevronRight className="h-4 w-4 text-gray-400" />
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Default content when no search query */}
+            {!query && !error && (
+              <div className="p-6 space-y-8">
+                {/* Recent Searches */}
+                <div>
+                  <h3 className="text-xs font-medium text-gray-500 px-0 py-2 border-b border-gray-100 mb-3">
+                    <Clock className="h-4 w-4 inline mr-2" />
+                    Recent Searches
+                  </h3>
+                  <div className="space-y-1">
+                    {recentSearches.map((search, index) => (
+                      <button
+                        key={index}
+                        className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors flex items-center justify-between"
+                        onClick={() => setQuery(search.query)}
+                      >
+                        <span>{search.query}</span>
+                        <span className="text-xs text-gray-400">{search.timestamp}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Popular Content */}
+                <div>
+                  <h3 className="text-xs font-medium text-gray-500 px-0 py-2 border-b border-gray-100 mb-3">
+                    <Trophy className="h-4 w-4 inline mr-2" />
+                    Popular Content
+                  </h3>
+                  <ul className="space-y-1">
+                    {popularContent.map((item, index) => {
+                      const isActive = !query && activeIndex === index
+                      return (
+                        <li
+                          key={item.id}
+                          onClick={() => handleSelect(item)}
+                          className={cn(
+                            "flex cursor-pointer items-center justify-between px-3 py-3 hover:bg-gray-50 rounded-md transition-colors",
+                            isActive && "bg-blue-50 border-l-2 border-blue-500"
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex-shrink-0 p-1.5 rounded-md bg-gray-50 border border-gray-100">
+                              {getIconForType(item.type)}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{item.title}</p>
+                              <p className="text-xs text-gray-500">{item.description}</p>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-gray-400" />
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              </div>
             )}
           </div>
-        </div>
-
-        <div className="border-b bg-muted/30">
-          <div className="flex gap-1 p-2 overflow-x-auto px-3 no-scrollbar">
-            {searchCategories.map((category) => (
-              <Button
-                key={category.id}
-                variant={activeCategory === category.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveCategory(category.id)}
-                className={cn(
-                  "flex items-center gap-1 whitespace-nowrap rounded-full text-xs h-8 px-3",
-                  activeCategory === category.id ? "bg-primary text-primary-foreground" : "bg-background border-muted hover:bg-muted"
-                )}
-              >
-                <category.icon className="h-3 w-3" />
-                <span>{category.name}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div className="p-3 max-h-[60vh] overflow-y-auto">
-          {searchQuery ? (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-sm font-medium mb-3 text-muted-foreground flex items-center">
-                  <Search className="h-3.5 w-3.5 mr-1.5" />
-                  Results for "{searchQuery}"
-                </h3>
-                
-                {/* Empty state */}
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="rounded-full bg-muted/50 p-3 mb-4">
-                    <Search className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-base font-medium mb-1">No results found</h3>
-                  <p className="text-sm text-muted-foreground max-w-[250px]">
-                    Try adjusting your search or filter to find what you're looking for
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {/* Recent searches */}
-              <div>
-                <h3 className="text-sm font-medium mb-3 text-muted-foreground flex items-center">
-                  <Clock className="h-3.5 w-3.5 mr-1.5" />
-                  Recent Searches
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {recentSearches.map((search, index) => (
-                    <Button
-                      key={index}
-                      variant="ghost"
-                      className="justify-start h-9 px-3 text-sm font-normal hover:bg-muted"
-                      onClick={() => setSearchQuery(search)}
-                    >
-                      <Search className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="truncate">{search}</span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Popular searches */}
-              <div>
-                <h3 className="text-sm font-medium mb-3 text-muted-foreground flex items-center">
-                  <Trophy className="h-3.5 w-3.5 mr-1.5" />
-                  Popular Content
-                </h3>
-                <div className="grid gap-2">
-                  {popularSearches.map((item, index) => (
-                    <div 
-                      key={index}
-                      className="flex items-center p-2 rounded-lg hover:bg-muted cursor-pointer group"
-                      onClick={() => setSearchQuery(item.title)}
-                    >
-                      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary mr-3">
-                        <item.icon className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium">{item.title}</h4>
-                        <p className="text-xs text-muted-foreground">{item.type}</p>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="border-t p-3 flex justify-between items-center text-xs text-muted-foreground bg-muted/30">
-          <div className="flex items-center">
-            Press <kbd className="mx-1 px-1.5 py-0.5 border rounded text-xs bg-muted">ESC</kbd> to close
-          </div>
-          <div className="flex items-center gap-1">
-            <kbd className="px-1.5 py-0.5 border rounded text-xs bg-muted">↑</kbd>
-            <kbd className="px-1.5 py-0.5 border rounded text-xs bg-muted">↓</kbd>
-            to navigate
+          
+          {/* Footer */}
+          <div className="px-6 py-3 text-xs text-gray-500 bg-gray-50 border-t">
+            <span className="inline-flex items-center">
+              <kbd className="px-1.5 py-0.5 bg-white border border-gray-200 rounded-md mr-1 font-mono text-gray-700">Esc</kbd> to close
+            </span>
+            <span className="mx-2">•</span>
+            <span className="inline-flex items-center">
+              <kbd className="px-1.5 py-0.5 bg-white border border-gray-200 rounded-md mr-1 font-mono text-gray-700">↑↓</kbd> to navigate
+            </span>
+            <span className="mx-2">•</span>
+            <span className="inline-flex items-center">
+              <kbd className="px-1.5 py-0.5 bg-white border border-gray-200 rounded-md mr-1 font-mono text-gray-700">↵</kbd> to select
+            </span>
           </div>
         </div>
       </DialogContent>
     </Dialog>
   )
-} 
+}
